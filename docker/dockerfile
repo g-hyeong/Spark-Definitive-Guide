@@ -63,4 +63,4 @@ WORKDIR /zeppelin
 
 # 시작 명령어 설정
 ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["bin/zeppelin.sh"]
+CMD ["/zeppelin/bin/zeppelin.sh"]

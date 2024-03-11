@@ -9,7 +9,9 @@ services:
             - "4040:4040" # Spark 웹 UI 포트를 호스트와 매핑
         volumes:
             - "./data:/data" # 필요한 경우 호스트의 데이터 디렉토리를 컨테이너의 데이터 디렉토리에 마운트
-            - "./notebooks:/zeppelin/notebook" # Zeppelin 노트북을 호스트와 동기화
+            - "./notebooks:/zeppelin/notebook"
+            - "./logs:/zeppelin/logs"
+            - "./spark-warehouse:/spark-2.3.2-bin-hadoop2.7/spark-warehouse"
         environment:
             - ZEPPELIN_ADDR=0.0.0.0
         restart: unless-stopped
