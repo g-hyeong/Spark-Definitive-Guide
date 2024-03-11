@@ -10,7 +10,7 @@ ENV Z_VERSION=0.8.0 \
     JAVA_HOME="/usr/lib/jvm/java-8-openjdk-arm64" \
     SPARK_VERSION="2.3.2" \
     PATH="/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
-    PYSPARK_PYTHON=python3
+    PYSPARK_PYTHON=python3.7
 
 # 시스템 설정 및 패키지 설치
 RUN set -xe && \
@@ -35,7 +35,7 @@ RUN set -xe && \
     apt-get install -y tini && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* 
-    
+
 # Python 3.7 설치
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
