@@ -8,7 +8,7 @@ services:
             - "8080:8080" # Zeppelin 포트를 호스트와 매핑
             - "4040:4040" # Spark 웹 UI 포트를 호스트와 매핑
         volumes:
-            - "./data:/data" # 필요한 경우 호스트의 데이터 디렉토리를 컨테이너의 데이터 디렉토리에 마운트
+            - "./data:/data"
             - "./notebooks:/zeppelin/notebook"
             - "./logs:/zeppelin/logs"
             - "./spark-warehouse:/spark-2.3.2-bin-hadoop2.7/spark-warehouse"
