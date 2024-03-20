@@ -1,18 +1,16 @@
 version: "3"
 
 services:
-    spark-practice:
-        image: gudev/spark_zeppelin_arm64:1.0.1
-        container_name: spark_zeppelin_arm64
+    spark:
+        image: gudev/spark-jupyterlab:2.3.2
+        container_name: spark-jupyterlab
         ports:
-            - "8080:8080" # Zeppelin 포트를 호스트와 매핑
-            - "4040:4040" # Spark 웹 UI 포트를 호스트와 매핑
+            - "8888:8888" # Jupyterlab
+            - "4040:4040" # Spark 웹 UI
         volumes:
             - "./data:/data"
             - "./book-code:/code"
-            - "./zeppelin-notebooks:/zeppelin/notebook"
-            - "./zeppelin-logs:/zeppelin/logs"
-            - "./spark-warehouse:/spark-2.3.2-bin-hadoop2.7/spark-warehouse"
-        environment:
-            - ZEPPELIN_ADDR=0.0.0.0
+            - "./jupyterlab-notebooks:/jupyter"
+            - "./spark-warehouse:/spark/spark-warehouse"
+
         restart: unless-stopped
