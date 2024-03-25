@@ -1,0 +1,76 @@
+FROM ubuntu:22.04
+
+# 환경 변수 설정
+ENV LANG="en_US.UTF-8" \
+    LC_ALL="en_US.UTF-8" \
+    SPARK_VERSION="2.3.2" \
+    PATH="/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    PYSPARK_PYTHON=python3.7 \
+    JUPYTER_HOME="/jupyter"
+
+# 시스템 설정 및 패키지 설치
+RUN set -xe && \
+    echo '#!/bin/sh' > /usr/sbin/policy-rc.d && \
+    echo 'exit 101' >> /usr/sbin/policy-rc.d && \
+    chmod +x /usr/sbin/policy-rc.d && \
+    dpkg-divert --local --rename --add /sbin/initctl && \
+    cp -a /usr/sbin/policy-rc.d /sbin/initctl && \
+    sed -i 's/^exit.*/exit 0/' /sbin/initctl && \
+    echo 'force-unsafe-io' > /etc/dpkg/dpkg.cfg.d/docker-apt-speedup && \
+    echo 'DPkg::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };' > /etc/apt/apt.conf.d/docker-clean && \
+    echo 'APT::Update::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };' >> /etc/apt/apt.conf.d/docker-clean && \
+    echo 'Dir::Cache::pkgcache ""; Dir::Cache::srcpkgcache "";' >> /etc/apt/apt.conf.d/docker-clean && \
+    echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/docker-no-languages && \
+    echo 'Acquire::GzipIndexes "true"; Acquire::CompressionTypes::Order:: "gz";' > /etc/apt/apt.conf.d/docker-gzip-indexes && \
+    echo 'Apt::AutoRemove::SuggestsImportant "false";' > /etc/apt/apt.conf.d/docker-autoremove-suggests && \
+    apt-get update && \
+    apt-get install -y locales software-properties-common build-essential wget curl grep sed dpkg && \
+    locale-gen $LANG && \
+    apt-get install -y openjdk-8-jdk-headless && \
+    apt-get install -y git && \
+    apt-get install -y tini && \
+    apt-get clean && \
+    # JAVA_HOME 환경변수 동적 설정 (arm64와 amd64 모두 호환되기 위함)
+    JAVA_HOME=$(dirname $(dirname $(update-alternatives --list java))) && \
+    echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment && \
+    rm -rf /var/lib/apt/lists/* 
+
+# Python 3.7 설치
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y python3.7 python3.7-distutils && \
+    apt-get install -y python3.7-venv python3.7-dev && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1 && \
+    update-alternatives --set python3 /usr/bin/python3.7 && \
+    python3.7 -m ensurepip && \
+    python3.7 -m pip install --upgrade pip setuptools wheel && \
+    # jupyterlab, pyspark 설치
+    python3.7 -m pip install jupyterlab pyspark==2.3.2
+
+# Jupyter 설정
+RUN mkdir ${JUPYTER_HOME} && \
+    jupyter notebook --generate-config && \
+    echo "c.NotebookApp.ip = '0.0.0.0'" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.open_browser = False" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.notebook_dir = '${JUPYTER_HOME}'" >> ~/.jupyter/jupyter_notebook_config.py
+
+RUN wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz && \
+    tar -xvzf spark-${SPARK_VERSION}-bin-hadoop2.7.tgz && \
+    mv spark-${SPARK_VERSION}-bin-hadoop2.7 spark && \
+    rm -f spark-${SPARK_VERSION}-bin-hadoop2.7.tgz && \
+    # sqlite, postgresql JDBC 다운 후 /spark/jars로 이동
+    wget https://github.com/xerial/sqlite-jdbc/releases/download/3.36.0.3/sqlite-jdbc-3.36.0.3.jar -O /spark/jars/sqlite-jdbc-3.36.0.3.jar && \
+    wget https://jdbc.postgresql.org/download/postgresql-42.2.18.jar -O /spark/jars/postgresql-42.2.18.jar
+
+ENV SPARK_HOME="/spark" \
+    PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip
+
+EXPOSE 8888
+
+WORKDIR /jupyter
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["jupyter", "lab", "--allow-root", "--NotebookApp.token="]
+
