@@ -2,7 +2,7 @@ version: "3"
 
 services:
     spark:
-        image: gudev/spark-jupyterlab:2.3.2
+        image: gudev/spark-jupyterlab:3.4.2
         container_name: spark-jupyterlab
         ports:
             - "8888:8888" # Jupyterlab
@@ -12,5 +12,25 @@ services:
             - "./book-code:/code"
             - "./jupyterlab-notebooks:/jupyter"
             - "./spark-warehouse:/spark/spark-warehouse"
+        environment:
+            - "SPARK_JDBC_DRIVER=org.postgresql.Driver"
+            - "SPARK_DB_URL=jdbc:postgresql://postgres:5432/spark"
+            - "SPARK_DB_USER=spark"
+            - "SPARK_DB_PASSWORD=spark"
+        depends_on:
+            - postgres
 
-        restart: unless-stopped
+    postgres:
+        image: postgres:15
+        container_name: postgres-db
+        environment:
+            POSTGRES_DB: spark
+            POSTGRES_USER: spark
+            POSTGRES_PASSWORD: spark
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+
+volumes:
+    postgres-data:
