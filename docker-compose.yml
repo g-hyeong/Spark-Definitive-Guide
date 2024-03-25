@@ -12,6 +12,7 @@ services:
             - "./book-code:/code"
             - "./jupyterlab-notebooks:/jupyter"
             - "./spark-warehouse:/spark/spark-warehouse"
+            - "./jupyter_config:/root/.jupyter"
         environment:
             - "SPARK_JDBC_DRIVER=org.postgresql.Driver"
             - "SPARK_DB_URL=jdbc:postgresql://postgres:5432/spark"
