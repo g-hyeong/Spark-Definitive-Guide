@@ -47,8 +47,8 @@ RUN apt-get update && \
     update-alternatives --set python3 /usr/bin/python3.7 && \
     python3.7 -m ensurepip && \
     python3.7 -m pip install --upgrade pip setuptools wheel && \
-    # jupyterlab, pyspark 설치
-    python3.7 -m pip install jupyterlab pyspark==2.3.2
+    # jupyterlab, pyspark, jupyterlab theme, code formatter 설치
+    python3.7 -m pip install jupyterlab pyspark==2.3.2 jupyterlab-horizon-theme jupyterlab-code-formatter black isort
 
 # Jupyter 설정
 RUN mkdir ${JUPYTER_HOME} && \
