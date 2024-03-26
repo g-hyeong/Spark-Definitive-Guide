@@ -2,3 +2,4 @@ Spark_완벽가이드.pdf
 .DS_Store
 jupyterlab-notebooks/.ipynb_checkpoints
 jupyterlab-notebooks/spark-warehouse/
+jupyter_config/
