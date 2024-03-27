@@ -4,6 +4,7 @@ services:
     spark:
         image: gudev/spark-jupyterlab:3.4.2
         container_name: spark-jupyterlab
+        user: "0:0"
         ports:
             - "8888:8888" # Jupyterlab
             - "4040:4040" # Spark 웹 UI
