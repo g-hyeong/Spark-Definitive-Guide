@@ -10,7 +10,6 @@ services:
             - "4040:4040" # Spark 웹 UI
         volumes:
             - "./data:/data"
-            - "./book-code:/code"
             - "./jupyterlab-notebooks:/jupyter"
             - "./spark-warehouse:/spark/spark-warehouse"
             - "./jupyter_config:/root/.jupyter"
